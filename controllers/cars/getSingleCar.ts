@@ -3,6 +3,9 @@ import { pool } from "../../db/pool";
 
 export const getSingleCar: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: "Missing car ID" });
+  }
 
   try {
     // ST_AsText(location) => returns "POINT(lon lat)"

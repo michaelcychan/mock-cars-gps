@@ -9,9 +9,6 @@ devRouter.get('/seed-data', async (req, res, next) => {
   res.status(200).json({ message: "Done" });
 });
 
-devRouter.get('/all-data', async (req,res,next) => {
-  await selectAllData(req,res,next);
-  res.status(200).json({ message: "Done" });
-});
+devRouter.get('/all-data', selectAllData);
 
 export default devRouter;
