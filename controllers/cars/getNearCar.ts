@@ -20,32 +20,39 @@ export const getNearCar: RequestHandler = async (req, res, next) => {
     return res.status(400).json({ message: "Invalid time format" });
   }
   try {
-    const result = await pool.query(
-      `WITH car_location AS (
-    SELECT location
-    FROM gps_events
-    WHERE device_id = $1
-      AND recorded_at BETWEEN
-        $2::timestamptz - INTERVAL '10 seconds'
-        AND
-        $2::timestamptz + INTERVAL '10 seconds'
-    ORDER BY recorded_at ASC
-    LIMIT 1
-  )
-  SELECT
-    g.device_id,
-    g.speed,
-    ST_AsGeoJSON(g.location) AS location,
-    g.recorded_at
-  FROM gps_events g
-  CROSS JOIN car_location
-  WHERE g.device_id <> $1
-    AND g.recorded_at BETWEEN
-      $2::timestamptz - INTERVAL '10 seconds'
-      AND
-      $2::timestamptz + INTERVAL '10 seconds'
-    AND ST_DWithin(g.location, car_location.location, 50)
-  ORDER BY g.recorded_at ASC`,
+    const result = await pool.query(`WITH car_location AS (
+      SELECT 
+        location 
+      FROM 
+        gps_events 
+      WHERE 
+        device_id = $1 
+        AND recorded_at BETWEEN $2 :: timestamptz - INTERVAL '10 seconds' 
+        AND $2 :: timestamptz + INTERVAL '10 seconds' 
+      ORDER BY 
+        recorded_at ASC 
+      LIMIT 
+        1
+    ) 
+    SELECT 
+      g.device_id, 
+      g.speed, 
+      ST_AsGeoJSON(g.location) AS location, 
+      g.recorded_at 
+    FROM 
+      gps_events g CROSS 
+      JOIN car_location 
+    WHERE 
+      g.device_id <> $1 
+      AND g.recorded_at BETWEEN $2 :: timestamptz - INTERVAL '10 seconds' 
+      AND $2 :: timestamptz + INTERVAL '10 seconds' 
+      AND ST_DWithin(
+        g.location, car_location.location, 
+        50
+      ) 
+    ORDER BY 
+      g.recorded_at ASC
+`,
       [id, time]
     );
 
